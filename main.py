@@ -1,18 +1,24 @@
 from tkinter import *
 from tkinter import filedialog as fd
+from tkinter import messagebox as mb
 from tkinter import ttk
 import requests
 
 
 
 def upload():
-    filepath = fd.askopenfilename()# путь к файлу, который будем получать
-    if filepath:
-        files = {"file": open(filepath, "rb")}# открываем файл в пкжиме чтения
-        response = requests.post("https://file.io", files=files)# ответ, кот. получим на направленный запрос
-        if response.status_code == 200:
-            link = response.json()["link"]
-            entry.insert(0, link)
+    try:
+        filepath = fd.askopenfilename()# путь к файлу, который будем получать
+        if filepath:
+            with open(filepath, "rb") as f:
+                files = {"file": f}# открываем файл в пкжиме чтения
+                response = requests.post("https://file.io", files=files)# ответ, кот. получим на направленный запрос
+                response.raise_for_status()
+                link = response.json()["link"]
+                entry.delete(0, END)
+                entry.insert(0, link)
+    except Exception as e:
+        mb.showerror("Ошибка!", f"Произошла ошибка: {e}")
 
 
 
@@ -26,5 +32,5 @@ button.pack()
 entry = ttk.Entry()
 entry.pack()
 
-window.maimloop()
+window.mainloop()
 
